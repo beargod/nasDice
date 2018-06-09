@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en" xmlns:value="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <title>NasRoll</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="js/vue.js"></script>
+    <script src="js/bignumber.js"></script>
+    <link href="css/nasroll.css" rel="stylesheet"/>
+    <link href="css/jquery.range.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.range.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+<body>
+<div class="vue-app">
+    <div class="nav navbar-default">
+        <div class="fl">NasDice</div>
+        <ul class="fr">
+            <li><a href="http://nebulas.io">星云链</a>&nbsp&nbsp|</li>
+            <li><a href="">Github</a></li>
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+    <div class="container-fluid rule_total">
+        <div class="row">
+            <div class="rule">
+                <div class=" col-sm-2 col-md-12">
+                    <div class="row"></div>
+                    <div class="col-sm-12 col-md-7">
+                        <p class="title">游戏规则</p>
+                    </div>
+                    <div class="col-sm-12 col-md-5">
+                        <span class="wallet" v-show="web_wallet">未连接到星云链节点，请安装&nbsp<a
+                                href="">星云链钱包</a>&nbsp后刷新页面。</span>
+                    </div>
+                </div>
+
+                <div class="fl col-sm-12 col-md-6">
+                    <ul>
+                        <li class="first">1.设置你的下注大小(NAS)</li>
+                        <li>2.选择两个幸运数字</li>
+                        <li>3.点击ROLL并在钱包弹出的交易页面确认交易</li>
+                    </ul>
+                </div>
+                <div class="fr col-sm-12 col-md-6">
+                    <ul>
+                        <li>4.如果ROLL出的数字在您选择的两个数字之间则游戏胜利</li>
+                        <li>5.游戏胜利后，我们将会把奖金立刻打入您的钱包里</li>
+                        <li>6.若失败，奖金则会进入奖池中</li>
+                    </ul>
+                </div>
+                <div class="clearfix"></div>
+                <span class="care">注意：如果奖池中的NAS不够支付您的奖金，奖金将会被打入账户余额，
+                            当奖池中的NAS足够时您可以随时提取您的账户余额。</span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row bet_total">
+            <div class="col-sm-4 col-xs-12">
+                <div class="bet">
+                    <h2>下注</h2>
+                    <div class="bet_size">
+                        <div>
+                            <label class="label1">设置下注大小</label>
+                        </div>
+                        <input v-model="bet_size" class="bet_number" type="number">
+                        <div class="choose">
+                            <button class="bet_min" @click="min">最小</button>
+                            <button class="bet_random" type="button" @click="random">随机</button>
+                            <button class="bet_max" type="button" @click="max">最大</button>
+                        </div>
+                    </div>
+                    <div class="win_chance">
+                        <label class="label1">选择两个数字</label>
+                        <div class="chance">{{chance}}%</div>
+                        <input type="hidden" class="slider-input" value="1,51"/>
+                    </div>
+                    <div class="section">
+                        <div class="up">
+                            <label class="label1">区间下限</label>
+                            <input class="chance" type="number" v-model="bet_up">
+                        </div>
+                        <div class="down">
+                            <label class="chance">区间上限</label>
+                            <input class="chance" type="number" v-model="bet_down">
+                        </div>
+                    </div>
+                    <div class="principal">
+                        <label class="label1">本金</label>
+                        <div class="num">
+                            <span class="chance">{{bet_size}}NAS</span>
+                        </div>
+                    </div>
+                    <div class="profit">
+                        <label class="label1">收益</label>
+                        <div class="num">
+                            <span class="chance">{{bet_profit}}NAS</span>
+                        </div>
+                    </div>
+                    <div class="commission">
+                        <div class="no-commission" v-show="commission===0">目前不需要支付佣金</div>
+                        <div class="commission" v-show="commission!=0">佣金{{commission}}%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4  col-xs-12">
+                <div class="roll">
+                    <div class="tt">
+                        <label class="label1">点击ROLL</label>
+                    </div>
+                    <button class="roll_but" @click="roll">ROLL</button>
+                    <div class="txhash">
+                        <span v-show="!tx_hash" @click="copy_hash">txhash:{{short_hash}}</span>
+                        <span class="nub" v-show="!web_wallet">当前未检测到Nas钱包，请安装</span>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="result">
+                        <div>
+                            <label class="label1">Roll结果</label>
+                        </div>
+                        <div class="result_nub">
+                            <div class="con">{{last_roll}}</div>
+                        </div>
+                        <div class="result_con">
+                            <div class="title">赢得</div>
+                            <div class="con">{{last_award}}</div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="pool">
+                        <label class="label1">奖池</label>
+                        <div class="num">
+                            <span class="chance">{{jackpot}}NAS</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="pool">
+                        <label class="label1">我的钱包</label>
+
+                        <div class="num">
+                            <span class="chance">{{wallet_balance}}NAS</span>
+                        </div>
+                        <div>
+                            {{address}}
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="my_income">
+                        <label class="label1">我的收益</label>
+                        <div class="num">
+                            <span class="chance">{{my_profit}}NAS</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="my_balance">
+                        <label class="label1">我的余额</label>
+                        <span class="chance">{{my_balance}}NAS</span>
+                        <input class="chance" type="number" v-model="take_balance">
+                        <button @click="take_out">取出</button>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4  col-xs-12">
+                <div class="record">
+                    <div class="tt">
+                        <label class="label1">历史记录</label>
+                        <ul id="assets_nav">
+                            <li class="active">全部</li>
+                            <li id="assets_1">我的</li>
+                            <div class="clearfix"></div>
+                        </ul>
+                        <ul id="assets_content">
+                            <li style="display: block">
+                                <table v-for="(h,index) in user_history">
+                                    <tr>
+                                        <th>id</th>
+                                        <th>target</th>
+                                        <th>rolled</th>
+                                        <th>result</th>
+                                        <th>nas</th>
+                                    </tr>
+                                    <tr>
+                                        <td>{{id}}</td>
+                                        <td>{{begin}}-{{under}}</td>
+                                        <td>{{rolled}}</td>
+                                        <td>{{result}}</td>
+                                        <td>{{nas}}</td>
+                                    </tr>
+                                </table>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="data"></div>
+</div>
+<footer id=footer class="footer hidden-print">
+    <div class="container text-center">
+        <p>NasDice use <a href="https://getbootstrap.com/">NEBULAS</a>, by <a
+                href="https://github.com/beargod">@laoc</a>.</p>
+    </div>
+</footer>
+<a href=# id=back-to-top style="display: inline;"><i class="fa fa-angle-up"></i></a>
+</body>
+<script type="text/javascript" src="js/nebPay.js"></script>
+<script type="text/javascript" src="js/nebulas.js"></script>
+<script src="index.js"></script>
+</body>
+</html>
