@@ -21,7 +21,7 @@
         <div class="fl">NasDice</div>
         <ul class="fr">
             <li><a href="http://nebulas.io">星云链</a>&nbsp&nbsp|</li>
-            <li><a href="">Github</a></li>
+            <li><a href="https://github.com/beargod/nasdice">Github</a></li>
         </ul>
         <div class="clearfix"></div>
     </div>
@@ -68,7 +68,7 @@
                         <div>
                             <label class="label1">设置下注大小</label>
                         </div>
-                        <input v-model="bet_size" class="bet_number" type="number">
+                        <input v-model="bet_size" class="bet_number" type="number" step="0.0001">
                         <div class="choose">
                             <button class="bet_min" @click="min">最小</button>
                             <button class="bet_random" type="button" @click="random">随机</button>
@@ -116,7 +116,6 @@
                     <button class="roll_but" @click="roll">ROLL</button>
                     <div class="txhash">
                         <span v-show="!tx_hash" @click="copy_hash">txhash:{{short_hash}}</span>
-                        <span class="nub" v-show="!web_wallet">当前未检测到Nas钱包，请安装</span>
                     </div>
                     <div class="clearfix"></div>
                     <div class="result">
@@ -171,11 +170,11 @@
                     <div class="tt">
                         <label class="label1">历史记录</label>
                         <ul id="assets_nav">
-                            <li class="active">全部</li>
-                            <li id="assets_1">我的</li>
+                            <li class="active" @click="all">全部</li>
+                            <li id="assets_1" @click="my">我的</li>
                             <div class="clearfix"></div>
                         </ul>
-                        <ul id="assets_content">
+                        <ul id="assets_content" v-show="is_user">
                             <li style="display: block">
                                 <table v-for="(h,index) in user_history">
                                     <tr>
@@ -186,11 +185,32 @@
                                         <th>nas</th>
                                     </tr>
                                     <tr>
-                                        <td>{{id}}</td>
-                                        <td>{{begin}}-{{under}}</td>
-                                        <td>{{rolled}}</td>
-                                        <td>{{result}}</td>
-                                        <td>{{nas}}</td>
+                                        <td>{{h.id}}</td>
+                                        <td>{{h.target}}</td>
+                                        <td>{{h.rolled}}</td>
+                                        <td>{{h.result}}</td>
+                                        <td>{{h.nas}}</td>
+                                    </tr>
+                                </table>
+                            </li>
+                        </ul>
+
+                        <ul id="active_content" v-show="!is_user">
+                            <li style="display: block">
+                                <table v-for="(h,index) in all_history">
+                                    <tr>
+                                        <th>id</th>
+                                        <th>target</th>
+                                        <th>rolled</th>
+                                        <th>result</th>
+                                        <th>nas</th>
+                                    </tr>
+                                    <tr>
+                                        <td>{{h.id}}</td>
+                                        <td>{{h.target}}</td>
+                                        <td>{{h.rolled}}</td>
+                                        <td>{{h.result}}</td>
+                                        <td>{{h.nas}}</td>
                                     </tr>
                                 </table>
                             </li>

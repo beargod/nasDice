@@ -35,7 +35,8 @@ var vm = new Vue({
         my_balance: 0,
         last_roll: 0,
         last_award: 0,
-        take_balance: 0
+        take_balance: 0,
+        is_user:1
     },
     methods: {
         min: function () {
@@ -62,13 +63,25 @@ var vm = new Vue({
         },
         take_out: function () {
             takeOut();
+        },
+        all: function(){
+            vm.$data.is_user=0;
+            getUserHistory();
+        },
+        my: function () {
+            vm.$data.is_user=1;
+            getUserHistory();
         }
     },
     watch: {
         bet_size: function (newVal, oldVal) {
 
+            if(newVal===0){
+                return;
+            }
             var newVal = Math.round(newVal * 10000) / 10000;
             this.bet_size = newVal;
+
             if (newVal < vm.$data.wallet_balance && newVal > vm.$data.lowest) {
                 resizeProfit();
                 return;
@@ -89,6 +102,7 @@ var vm = new Vue({
                 this.bet_size = vm.$data.lowest;
                 resizeProfit();
             }
+            resizeProfit();
         },
 
         take_balance: function (newVal, oldVal) {
@@ -107,15 +121,15 @@ var vm = new Vue({
             if (newVal > 100) {
                 newVal = 100;
             }
-            if (newVal - vm.$data.bet_up > 100 - vm.$data.commission) {
-                newVal = 100 - vm.$data.commission + vm.$data.bet_up;
+            if (newVal - vm.$data.bet_up > 98 - vm.$data.commission) {
+                newVal = 98 - vm.$data.commission + vm.$data.bet_up;
             }
             if (newVal < vm.$data.bet_up) {
                 newVal = vm.$data.bet_up;
             }
 
             this.bet_down = newVal;
-            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up;
+            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up+1;
             $('.slider-input').jRange('setValue', jrVal());
             resizeProfit();
         },
@@ -127,12 +141,12 @@ var vm = new Vue({
             if (newVal > vm.$data.bet_down) {
                 newVal = vm.$data.bet_down;
             }
-            if (vm.$data.bet_down - newVal > 100 - vm.$data.commission) {
-                newVal = vm.$data.commission + vm.$data.bet_up;
+            if (vm.$data.bet_down - newVal > 98 - vm.$data.commission) {
+                newVal = vm.$data.bet_down+vm.$data.commission-98;
             }
 
             this.bet_up = newVal;
-            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up;
+            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up+1;
             $('.slider-input').jRange('setValue', jrVal());
             resizeProfit();
         }
@@ -165,8 +179,38 @@ getJackpot();
 
 getUser();
 
+getUserHistory();
+
 var intervalQuery;
 
+function getUserHistory() {
+    var value = vm.bet_size;
+    var callArgs = "";
+    nebPay.simulateCall(dappAddress, value, "userHistory", callArgs, {
+        listener: cbUserHistory
+    });
+
+}
+
+function cbUserHistory(rs) {
+    cbnetwork(rs);
+    var hArray = JSON.parse(rs.result);
+    if (!hArray) {
+        return;
+    }
+    var uhArray = [];
+    for (var i = 0; i < hArray.length; i++) {
+        var uh = new Object();
+        uh.id=hArray[i].id;
+        uh.target=hArray[i].begin+"-"+hArray[i].under;
+        uh.rolled=hArray[i].result;
+        var award = bigNumberToNumber(hArray[i].award);
+        uh.result=award>0?"win":"lose";
+        uh.nas = award>0?"+"+award:"-"+bigNumberToNumber(hArray[i].nas);
+        uhArray.push(uh);
+    }
+    vm.user_history=uhArray;
+}
 
 function takeOut() {
     var value = vm.bet_size;
@@ -185,6 +229,7 @@ function cbTakeout(rs) {
                 console.log("tx result: " + JSON.stringify(resp))
                 if (resp.status == 1) {
                     clearInterval(intervalQuery);
+                    intervalQuery=null;
                     alert("取出余额成功");
                     getJackpot();
                     getUser();
@@ -263,7 +308,6 @@ function cbUser(rs) {
 
     vm.my_balance = bigNumberToNumber(toInt(result.balance));
     vm.my_profit = bigNumberToNumber(toInt(result.award));
-    vm.user_history = result.history;
 }
 
 function getJackpot() {
@@ -383,9 +427,8 @@ function getBalance() {
 function RandomNumBoth(Min, Max) {
     var Range = Max - Min;
     var Rand = Math.random();
-    var num = Min + Math.round(Rand * Range); //四舍五入
-    $('.bet_number').val(num);
-    return num;
+    var num = Min + Rand * Range; //四舍五入
+    return Math.round(num*10000)/10000;
 };
 
 $(document).ready(function () {
@@ -396,7 +439,7 @@ $(document).ready(function () {
         var nn = change.split(',');
         vm.$data.bet_up = parseFloat(nn[0]);
         vm.$data.bet_down = parseFloat(nn[1]);
-        vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up;
+        vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up+1;
     });
 });
 
