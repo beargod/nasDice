@@ -21,9 +21,15 @@
         <div class="fl">NasDice</div>
         <ul class="fr">
             <li><a href="http://nebulas.io">星云链</a>&nbsp&nbsp|</li>
-            <li><a href="https://github.com/beargod/nasdice">Github</a></li>
+            <li><a href="https://github.com/beargod/nasdice">Github</a>&nbsp&nbsp|</li>
+            <li><a href="index_en.html">中文</a></li>
         </ul>
         <div class="clearfix"></div>
+    </div>
+    <div class ="container-fluid" v-show="!address||error_address">
+        <label class="label1">输入你的钱包地址，查询游戏数据</label>
+        <input v-model="address">
+        <span v-show="error_address">不规则的地址</span>
     </div>
     <div class="container-fluid rule_total">
         <div class="row">
