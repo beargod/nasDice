@@ -85,7 +85,7 @@
                     <div class="win_chance">
                         <label class="label1">选择两个数字</label>
                         <div class="chance">{{chance}}%</div>
-                        <input type="hidden" class="slider-input" value="1,51"/>
+                        <input type="hidden" class="slider-input" value="1,50"/>
                     </div>
                     <div class="section">
                         <div class="up">
@@ -132,9 +132,9 @@
                         <div class="result_nub">
                             <div class="con">{{last_roll}}</div>
                         </div>
-                        <div class="result_con">
+                        <div class="result_con" v-if="win">
                             <div class="title">赢得</div>
-                            <div class="con">{{last_award}}</div>
+                            <div class="con">{{last_award}}NAS</div>
                         </div>
                         <div class="clearfix"></div>
                     </div>
