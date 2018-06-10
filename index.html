@@ -20,16 +20,16 @@
     <div class="nav navbar-default">
         <div class="fl">NasDice</div>
         <ul class="fr">
-            <li><a href="http://nebulas.io">Nebulas</a>&nbsp&nbsp|</li>
+            <li><a href="http://nebulas.io">星云链</a>&nbsp&nbsp|</li>
             <li><a href="https://github.com/beargod/nasdice">Github</a>&nbsp&nbsp|</li>
-            <li><a href="index.html">En</a></li>
+            <li><a href="index_en.html">en</a></li>
         </ul>
         <div class="clearfix"></div>
     </div>
     <div class ="container-fluid" v-show="!address||error_address">
-        <label class="label1">add your address for game data</label>
+        <label class="label1">输入你的钱包地址，查询游戏数据</label>
         <input v-model="address">
-        <span v-show="error_address">invalid address</span>
+        <span v-show="error_address">不规则的地址</span>
     </div>
     <div class="container-fluid rule_total">
         <div class="row">
@@ -37,31 +37,32 @@
                 <div class=" col-sm-2 col-md-12">
                     <div class="row"></div>
                     <div class="col-sm-12 col-md-7">
-                        <p class="title">How To Play</p>
+                        <p class="title">游戏规则</p>
                     </div>
                     <div class="col-sm-12 col-md-5">
-                        <span class="wallet" v-show="web_wallet">Not connected to Nebulas node. Install &nbsp<a
-                                href="">NasWallet</a>&nbsp to connect.</span>
-                        <span class="wallet" v-show="network_error">Nebulas network error,please try again</span>
+                        <span class="wallet" v-show="web_wallet">未连接到星云链节点，请安装&nbsp<a
+                                href="">星云链钱包</a>&nbsp后刷新页面。</span>
+                        <span class="wallet" v-show="network_error">星云链网络抽风啦，请稍后刷新重试</span>
                     </div>
                 </div>
 
                 <div class="fl col-sm-12 col-md-6">
                     <ul>
-                        <li class="first">1.Set your bet (units of Ether)</li>
-                        <li>2.Choose two number  </li>
-                        <li>3.Click roll and confirm the transaction on nas wallet</li>
+                        <li class="first">1.设置你的下注大小(NAS)</li>
+                        <li>2.选择两个幸运数字</li>
+                        <li>3.点击ROLL并在钱包弹出的交易页面确认交易</li>
                     </ul>
                 </div>
                 <div class="fr col-sm-12 col-md-6">
                     <ul>
-                        <li>4.To win, the roll result needs to between two numbers.</li>
-                        <li>5.If you win, we will send you profit  and  wager </li>
-                        <li>6.If you lose,your wager will pull in the jackpot</li>
+                        <li>4.如果ROLL出的数字在您选择的两个数字之间则游戏胜利</li>
+                        <li>5.游戏胜利后，我们将会把奖金立刻打入您的钱包里</li>
+                        <li>6.若失败，奖金则会进入奖池中</li>
                     </ul>
                 </div>
                 <div class="clearfix"></div>
-                <span class="care">note:If jackpot is not enough for your reward,your reward will be send to your balance, you can take out your balance when the jackpot is enough</span>
+                <span class="care">注意：如果奖池中的NAS不够支付您的奖金，奖金将会被打入账户余额，
+                            当奖池中的NAS足够时您可以随时提取您的账户余额。</span>
             </div>
         </div>
     </div>
@@ -69,41 +70,41 @@
         <div class="row bet_total">
             <div class="col-sm-4 col-xs-12">
                 <div class="bet">
-                    <h2>Place your bet</h2>
+                    <h2>下注</h2>
                     <div class="bet_size">
                         <div>
-                            <label class="label1">Set bet size</label>
+                            <label class="label1">设置下注大小</label>
                         </div>
                         <input v-model="bet_size" class="bet_number" type="number" step="0.0001">
                         <div class="choose">
-                            <button class="bet_min" @click="min">min</button>
-                            <button class="bet_random" type="button" @click="random">random</button>
-                            <button class="bet_max" type="button" @click="max">max</button>
+                            <button class="bet_min" @click="min">最小</button>
+                            <button class="bet_random" type="button" @click="random">随机</button>
+                            <button class="bet_max" type="button" @click="max">最大</button>
                         </div>
                     </div>
                     <div class="win_chance">
-                        <label class="label1">Choose two number</label>
+                        <label class="label1">选择两个数字</label>
                         <div class="chance">{{chance}}%</div>
                         <input type="hidden" class="slider-input" value="1,50"/>
                     </div>
                     <div class="section">
                         <div class="up">
-                            <label class="label1">Roll up</label>
+                            <label class="label1">区间下限</label>
                             <input class="chance" type="number" v-model="bet_up">
                         </div>
                         <div class="down">
-                            <label class="chance">Roll under</label>
+                            <label class="chance">区间上限</label>
                             <input class="chance" type="number" v-model="bet_down">
                         </div>
                     </div>
                     <div class="principal">
-                        <label class="label1">Your wager</label>
+                        <label class="label1">本金</label>
                         <div class="num">
                             <span class="chance">{{bet_size}}NAS</span>
                         </div>
                     </div>
                     <div class="profit">
-                        <label class="label1">for a profit of</label>
+                        <label class="label1">收益</label>
                         <div class="num">
                             <span class="chance">{{bet_profit}}NAS</span>
                         </div>
@@ -117,7 +118,7 @@
             <div class="col-sm-4  col-xs-12">
                 <div class="roll">
                     <div class="tt">
-                        <label class="label1">Click roll</label>
+                        <label class="label1">点击ROLL</label>
                     </div>
                     <button class="roll_but" @click="roll">ROLL</button>
                     <div class="txhash">
@@ -126,26 +127,26 @@
                     <div class="clearfix"></div>
                     <div class="result">
                         <div>
-                            <label class="label1">Roll result</label>
+                            <label class="label1">Roll结果</label>
                         </div>
                         <div class="result_nub">
                             <div class="con">{{last_roll}}</div>
                         </div>
                         <div class="result_con" v-if="win">
-                            <div class="title">You win</div>
+                            <div class="title">赢得</div>
                             <div class="con">{{last_award}}NAS</div>
                         </div>
                         <div class="clearfix"></div>
                     </div>
                     <div class="pool">
-                        <label class="label1">Jackpot</label>
+                        <label class="label1">奖池</label>
                         <div class="num">
                             <span class="chance">{{jackpot}}NAS</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
                     <div class="pool">
-                        <label class="label1">My wallet</label>
+                        <label class="label1">我的钱包</label>
 
                         <div class="num">
                             <span class="chance">{{wallet_balance}}NAS</span>
@@ -156,18 +157,18 @@
                         <div class="clearfix"></div>
                     </div>
                     <div class="my_income">
-                        <label class="label1">My profit</label>
+                        <label class="label1">我的收益</label>
                         <div class="num">
                             <span class="chance">{{my_profit}}NAS</span>
                         </div>
                         <div class="clearfix"></div>
                     </div>
                     <div class="my_balance">
-                        <label class="label1">My banlance</label>
+                        <label class="label1">我的余额</label>
                         <span class="chance">{{my_balance}}NAS</span>
                         <input class="takeout" type="number" v-model="take_balance">
                         <div class="num">
-                            <button class="takeout_button" @click="take_out">take</button>
+                            <button class="takeout_button" @click="take_out">取出</button>
                         </div>
                         <div class="clearfix"></div>
                     </div>
@@ -176,10 +177,10 @@
             <div class="col-sm-4  col-xs-12">
                 <div class="record">
                     <div class="tt">
-                        <label class="label1">Result</label>
+                        <label class="label1">历史记录</label>
                         <ul id="assets_nav">
-                            <li class="active" @click="all">ALL</li>
-                            <li id="assets_1" @click="my">MY</li>
+                            <li class="active" @click="all">全部</li>
+                            <li id="assets_1" @click="my">我的</li>
                             <div class="clearfix"></div>
                         </ul>
                         <ul id="assets_content">
