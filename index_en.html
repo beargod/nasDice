@@ -109,8 +109,8 @@
                         </div>
                     </div>
                     <div class="commission">
-                        <div class="no-commission" v-show="commission===0">目前不需要支付佣金</div>
-                        <div class="commission" v-show="commission!=0">佣金{{commission}}%</div>
+                        <div class="no-commission" v-show="commission===0">no commission</div>
+                        <div class="commission" v-show="commission!=0">commission{{commission}}%</div>
                     </div>
                 </div>
             </div>
@@ -121,7 +121,7 @@
                     </div>
                     <button class="roll_but" @click="roll">ROLL</button>
                     <div class="txhash">
-                        <span v-show="!tx_hash" @click="copy_hash">txhash:{{short_hash}}</span>
+                        <span v-show="tx_hash" @click="copy_hash">txhash:{{short_hash}}</span>
                     </div>
                     <div class="clearfix"></div>
                     <div class="result">
