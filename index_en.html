@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en" xmlns:value="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <title>NasDice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="js/vue.js"></script>
+    <script src="js/bignumber.js"></script>
+    <link href="css/nasroll.css" rel="stylesheet"/>
+    <link href="css/jquery.range.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.range.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+<body>
+<div class="vue-app">
+    <div class="nav navbar-default">
+        <div class="fl">NasDice</div>
+        <ul class="fr">
+            <li><a href="http://nebulas.io">Nebulas</a>&nbsp&nbsp|</li>
+            <li><a href="https://github.com/beargod/nasdice">Github</a>&nbsp&nbsp|</li>
+            <li><a href="index.html">En</a></li>
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+    <div class ="container-fluid" v-show="!address||error_address">
+        <label class="label1">add your address for game data</label>
+        <input v-model="address">
+        <span v-show="error_address">invalid address</span>
+    </div>
+    <div class="container-fluid rule_total">
+        <div class="row">
+            <div class="rule">
+                <div class=" col-sm-2 col-md-12">
+                    <div class="row"></div>
+                    <div class="col-sm-12 col-md-7">
+                        <p class="title">How To Play</p>
+                    </div>
+                    <div class="col-sm-12 col-md-5">
+                        <span class="wallet" v-show="web_wallet">Not connected to Nebulas node. Install &nbsp<a
+                                href="">NasWallet</a>&nbsp to connect.</span>
+                        <span class="wallet" v-show="network_error">Nebulas network error,please try again</span>
+                    </div>
+                </div>
+
+                <div class="fl col-sm-12 col-md-6">
+                    <ul>
+                        <li class="first">1.Set your bet (units of Ether)</li>
+                        <li>2.Choose two number  </li>
+                        <li>3.Click roll and confirm the transaction on nas wallet</li>
+                    </ul>
+                </div>
+                <div class="fr col-sm-12 col-md-6">
+                    <ul>
+                        <li>4.To win, the roll result needs to between two numbers.</li>
+                        <li>5.If you win, we will send you profit  and  wager </li>
+                        <li>6.If you lose,your wager will pull in the jackpot</li>
+                    </ul>
+                </div>
+                <div class="clearfix"></div>
+                <span class="care">note:If jackpot is not enough for your reward,your reward will be send to your balance, you can take out your balance when the jackpot is enough</span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row bet_total">
+            <div class="col-sm-4 col-xs-12">
+                <div class="bet">
+                    <h2>Place your bet</h2>
+                    <div class="bet_size">
+                        <div>
+                            <label class="label1">Set bet size</label>
+                        </div>
+                        <input v-model="bet_size" class="bet_number" type="number" step="0.0001">
+                        <div class="choose">
+                            <button class="bet_min" @click="min">min</button>
+                            <button class="bet_random" type="button" @click="random">random</button>
+                            <button class="bet_max" type="button" @click="max">max</button>
+                        </div>
+                    </div>
+                    <div class="win_chance">
+                        <label class="label1">Choose two number</label>
+                        <div class="chance">{{chance}}%</div>
+                        <input type="hidden" class="slider-input" value="1,51"/>
+                    </div>
+                    <div class="section">
+                        <div class="up">
+                            <label class="label1">Roll up</label>
+                            <input class="chance" type="number" v-model="bet_up">
+                        </div>
+                        <div class="down">
+                            <label class="chance">Roll under</label>
+                            <input class="chance" type="number" v-model="bet_down">
+                        </div>
+                    </div>
+                    <div class="principal">
+                        <label class="label1">Your wager</label>
+                        <div class="num">
+                            <span class="chance">{{bet_size}}NAS</span>
+                        </div>
+                    </div>
+                    <div class="profit">
+                        <label class="label1">for a profit of</label>
+                        <div class="num">
+                            <span class="chance">{{bet_profit}}NAS</span>
+                        </div>
+                    </div>
+                    <div class="commission">
+                        <div class="no-commission" v-show="commission===0">目前不需要支付佣金</div>
+                        <div class="commission" v-show="commission!=0">佣金{{commission}}%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4  col-xs-12">
+                <div class="roll">
+                    <div class="tt">
+                        <label class="label1">Click roll</label>
+                    </div>
+                    <button class="roll_but" @click="roll">ROLL</button>
+                    <div class="txhash">
+                        <span v-show="!tx_hash" @click="copy_hash">txhash:{{short_hash}}</span>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="result">
+                        <div>
+                            <label class="label1">Roll result</label>
+                        </div>
+                        <div class="result_nub">
+                            <div class="con">{{last_roll}}</div>
+                        </div>
+                        <div class="result_con">
+                            <div class="title">You win</div>
+                            <div class="con">{{last_award}}</div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="pool">
+                        <label class="label1">Jackpot</label>
+                        <div class="num">
+                            <span class="chance">{{jackpot}}NAS</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="pool">
+                        <label class="label1">My wallet</label>
+
+                        <div class="num">
+                            <span class="chance">{{wallet_balance}}NAS</span>
+                        </div>
+                        <div>
+                            {{address}}
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="my_income">
+                        <label class="label1">My profit</label>
+                        <div class="num">
+                            <span class="chance">{{my_profit}}NAS</span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="my_balance">
+                        <label class="label1">My banlance</label>
+                        <span class="chance">{{my_balance}}NAS</span>
+                        <input class="takeout" type="number" v-model="take_balance">
+                        <div class="num">
+                            <button class="takeout_button" @click="take_out">take</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4  col-xs-12">
+                <div class="record">
+                    <div class="tt">
+                        <label class="label1">Result</label>
+                        <ul id="assets_nav">
+                            <li class="active" @click="all">ALL</li>
+                            <li id="assets_1" @click="my">MY</li>
+                            <div class="clearfix"></div>
+                        </ul>
+                        <ul id="assets_content">
+                            <li style="display: block">
+                                <table >
+                                    <tr>
+                                        <th>id</th>
+                                        <th>target</th>
+                                        <th>rolled</th>
+                                        <th>result</th>
+                                        <th>nas</th>
+                                    </tr>
+                                    <tr v-show="is_user" v-for="(h,index) in user_history">
+                                        <td>{{h.id}}</td>
+                                        <td>{{h.target}}</td>
+                                        <td>{{h.rolled}}</td>
+                                        <td>{{h.result}}</td>
+                                        <td>{{h.nas}}</td>
+                                    </tr>
+                                    <tr v-show="!is_user" v-for="(h,index) in all_history">
+                                        <td>{{h.id}}</td>
+                                        <td>{{h.target}}</td>
+                                        <td>{{h.rolled}}</td>
+                                        <td>{{h.result}}</td>
+                                        <td>{{h.nas}}</td>
+                                    </tr>
+                                </table>
+                            </li>
+                        </ul>
+
+                        <div class="page-bar">
+                            <ul>
+                                <li v-if="cur>1"><a @click="pageClick">上一页</a></li>
+                                <li >
+                                    <a v-if="cur>1" @click="btnClick(1)">...</a>
+                                </li>
+                                <li>
+                                    <a @click="btnClick(index)">{{cur}}</a>
+                                </li>
+                                <li >
+                                    <a v-if="cur<page_size" @click="btnClick(page_size)">...</a>
+                                </li>
+                                <li v-if="cur!=page_size"><a @click="cur++,pageClick()">下一页</a></li>
+                                <li><a>共<i>{{page_size}}</i>页</a></li>
+                            </ul>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="data"></div>
+</div>
+<footer id=footer class="footer hidden-print">
+    <div class="container text-center">
+        <p>NasDice use <a href="https://getbootstrap.com/">NEBULAS</a>, by <a
+                href="https://github.com/beargod">@laoc</a>.</p>
+    </div>
+</footer>
+<a href=# id=back-to-top style="display: inline;"><i class="fa fa-angle-up"></i></a>
+</body>
+<script type="text/javascript" src="js/nebPay.js"></script>
+<script type="text/javascript" src="js/nebulas.js"></script>
+<script src="index.js"></script>
+</body>
+</html>
