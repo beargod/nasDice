@@ -43,7 +43,8 @@ var vm = new Vue({
         user_size: 0,
         all_size: 0,
         network_error: 0,//当前页码
-        error_address: 0
+        error_address: 0,
+        win: 0
     },
     methods: {
         min: function () {
@@ -408,7 +409,10 @@ function successCb(rs) {
     }
     vm.last_roll = newRoll.result;
     if (new BigNumber(newRoll.award).gt(0)) {
+        vm.win=1;
         alert("恭喜你，赢得了" + bigNumberToNumber(newRoll.award) + "nas");
+    }else {
+        vm.win=0;
     }
     vm.last_award = bigNumberToNumber(newRoll.award);
     getJackpot();

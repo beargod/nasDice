@@ -26,6 +26,11 @@
         </ul>
         <div class="clearfix"></div>
     </div>
+    <div class ="container-fluid" v-show="!address||error_address">
+        <label class="label1">add your address for game data</label>
+        <input v-model="address">
+        <span v-show="error_address">invalid address</span>
+    </div>
     <div class="container-fluid rule_total">
         <div class="row">
             <div class="rule">
@@ -126,9 +131,9 @@
                         <div class="result_nub">
                             <div class="con">{{last_roll}}</div>
                         </div>
-                        <div class="result_con">
+                        <div class="result_con" v-if="win">
                             <div class="title">You win</div>
-                            <div class="con">{{last_award}}</div>
+                            <div class="con">{{last_award}}NAS</div>
                         </div>
                         <div class="clearfix"></div>
                     </div>
