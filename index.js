@@ -21,6 +21,7 @@ var vm = new Vue({
         jackpot: 0,
         all_history: [],
         user_history: [],
+        show_history: [],
         history_size: 0,
         bet_up: 1,
         bet_down: 51,
@@ -36,7 +37,12 @@ var vm = new Vue({
         last_roll: 0,
         last_award: 0,
         take_balance: 0,
-        is_user:1
+        is_user:1,
+        page_size: 1, //总页数
+        cur: 1,
+        user_size:0,
+        all_size:0,
+        network_error:0//当前页码
     },
     methods: {
         min: function () {
@@ -66,12 +72,53 @@ var vm = new Vue({
         },
         all: function(){
             vm.$data.is_user=0;
-            getUserHistory();
+            this.cur=1;
+            this.page_size=Math.round(this.all_size/10)+1;
+            getAllSize();
+            getAllHistory();
         },
         my: function () {
             vm.$data.is_user=1;
+            this.cur=1;
+            this.page_size=Math.round(this.user_size/10)+1;
             getUserHistory();
+        },
+        btnClick: function(data){//页码点击事件
+            if(data != this.cur){
+                this.cur = data
+            }
+            if(this.is_user) {
+                getUserHistory();
+            }else{
+                getAllHistory();
+            }
         }
+    },computed: {
+        indexs: function(){
+            var left = 1;
+            var right = this.page_size;
+            var ar = [];
+            if(this.page_size>= 5){
+                if(this.cur > 3 && this.cur < this.page_size-2){
+                    left = this.cur - 2
+                    right = this.cur + 2
+                }else{
+                    if(this.cur<=3){
+                        left = 1
+                        right = 5
+                    }else{
+                        right = this.page_size
+                        left = this.page_size -4
+                    }
+                }
+            }
+            while (left <= right){
+                ar.push(left)
+                left ++
+            }
+            return ar
+        }
+
     },
     watch: {
         bet_size: function (newVal, oldVal) {
@@ -153,14 +200,20 @@ var vm = new Vue({
             vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up+1;
             $('.slider-input').jRange('setValue', jrVal());
             resizeProfit();
+        },
+        cur: function(oldValue , newValue){
+            console.log(arguments);
         }
     }
 });
 
+
+
+
 $("#hide_txhash").hide();
 
 var nebPay = new NebPay();
-var dappAddress = "n1fPRVXkw7KczBVSCk5x3yr7x68GFRJqSpy";
+var dappAddress = "n1wRZB52hZFzj43sEd4Tetg9XbF69Yk7BZJ";
 
 //检查扩展是否已安装
 //如果安装了扩展，var“webExtensionWallet”将被注入到web页面中1
@@ -185,25 +238,77 @@ getUser();
 
 getUserHistory();
 
+getAllSize();
+
 var intervalQuery;
 
-function getUserHistory() {
-    var value = vm.bet_size;
-    var callArgs = "";
-    nebPay.simulateCall(dappAddress, value, "userHistory", callArgs, {
-        listener: cbUserHistory
+function getAllSize() {
+    var value = 0;
+    var callArgs = ""
+    nebPay.simulateCall(dappAddress, value, "getSize", callArgs, {
+        listener: cbSize
     });
-
 }
 
-function cbUserHistory(rs) {
+function cbSize(rs) {
     cbnetwork(rs);
+    vm.all_size = !rs.result?0:rs.result;
+}
+
+function getAllHistory() {
+    var begin = 10*(vm.cur-1);
+    var end = begin+10;
+    var value = 0;
+    var callArgs = "["+begin+","+end+"]";
+    nebPay.simulateCall(dappAddress, value, "getHistory", callArgs, {
+        listener: cbAllHistory
+    });
+}
+
+function cbAllHistory(rs) {
+    cbnetwork(rs);
+    if(!rs.result){
+        return;
+    }
     var hArray = JSON.parse(rs.result);
     if (!hArray) {
         return;
     }
     var uhArray = [];
-    for (var i = 0; i < hArray.length; i++) {
+    for (var i = 0; i<hArray.length; i++) {
+        var uh = new Object();
+        uh.id=hArray[i].id;
+        uh.target=hArray[i].begin+"-"+hArray[i].under;
+        uh.rolled=hArray[i].result;
+        var award = bigNumberToNumber(hArray[i].award);
+        uh.result=award>0?"win":"lose";
+        uh.nas = award>0?"+"+award:"-"+bigNumberToNumber(hArray[i].nas);
+        uhArray.push(uh);
+    }
+    vm.all_history=uhArray;
+}
+
+function getUserHistory() {
+    var begin = 10*(vm.cur-1);
+    var end = begin+10;
+    var value = 0;
+    var callArgs = "["+begin+","+end+"]";
+    nebPay.simulateCall(dappAddress, value, "userHistory", callArgs, {
+        listener: cbUserHistory
+    });
+}
+
+function cbUserHistory(rs) {
+    cbnetwork(rs);
+    if(!rs.result){
+        return;
+    }
+    var hArray = JSON.parse(rs.result);
+    if (!hArray) {
+        return;
+    }
+    var uhArray = [];
+    for (var i = 0; i<hArray.length; i++) {
         var uh = new Object();
         uh.id=hArray[i].id;
         uh.target=hArray[i].begin+"-"+hArray[i].under;
@@ -217,7 +322,7 @@ function cbUserHistory(rs) {
 }
 
 function takeOut() {
-    var value = vm.bet_size;
+    var value = 0;
     var callArgs = "[" + numberToBigNumber(vm.take_balance) + "]"
     nebPay.call(dappAddress, value, "takeout", callArgs, {
         listener: cbTakeout
@@ -227,6 +332,9 @@ function takeOut() {
 function cbTakeout(rs) {
     cbnetwork(rs);
     if (rs.hasOwnProperty('txhash') && rs.txhash) {
+        vm.tx_hash = rs.txhash;
+        var length = vm.tx_hash.length;
+        vm.short_hash = vm.tx_hash.substr(0, 5) + "..." + vm.tx_hash.substr(length - 6, length - 1);
         alert("数据以及打包提交到链上，等待确认后将会自动刷新数据");
         intervalQuery = setInterval(function () {
             neb.api.getTransactionReceipt({hash: vm.tx_hash}).then(function (resp) {
@@ -270,6 +378,7 @@ function cbRoll(rs) {
                 console.log("tx result: " + JSON.stringify(resp))
                 if (resp.status == 1) {
                     clearInterval(intervalQuery);
+                    intervalQuery=null;
                     successCb(resp);
                 }
             }).catch(function (err) {
@@ -282,7 +391,7 @@ function cbRoll(rs) {
 
 
 function successCb(rs) {
-    var newRoll = JSON.parse(rs.result);
+    var newRoll = JSON.parse(rs.execute_result);
     if (!newRoll) {
         return;
     }
@@ -293,6 +402,7 @@ function successCb(rs) {
     vm.last_award = bigNumberToNumber(newRoll.award);
     getJackpot();
     getUser();
+    getUserHistory();
 }
 
 function getUser() {
@@ -312,6 +422,7 @@ function cbUser(rs) {
 
     vm.my_balance = bigNumberToNumber(toInt(result.balance));
     vm.my_profit = bigNumberToNumber(toInt(result.award));
+    vm.user_size = result.hSize;
 }
 
 function getJackpot() {
@@ -355,6 +466,8 @@ function cbCommission(rs) {
     }
 }
 
+function showHistory(){
+}
 
 function getLowest() {
     var value = 0;
@@ -375,7 +488,7 @@ function cbLowest(rs) {
 
 function cbnetwork(rs) {
     if (rs == "Network Error") {
-        alert("星云链主网抽风啦，请稍后再试")
+        vm.network_error=1;
         return
     }
     if (rs == "Error: Transaction rejected by user") {
@@ -385,6 +498,7 @@ function cbnetwork(rs) {
     if (!rs.execute_err && rs.execute_err != "") {
         alert(rs.execute_err);
     }
+    vm.network_error=0;
 }
 
 function bigNumberToNumber(num) {

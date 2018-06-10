@@ -36,6 +36,7 @@
                     <div class="col-sm-12 col-md-5">
                         <span class="wallet" v-show="web_wallet">未连接到星云链节点，请安装&nbsp<a
                                 href="">星云链钱包</a>&nbsp后刷新页面。</span>
+                        <span class="wallet" v-show="network_error">星云链网络抽风啦，请稍后刷新重试</span>
                     </div>
                 </div>
 
@@ -176,7 +177,7 @@
                             <li id="assets_1" @click="my">我的</li>
                             <div class="clearfix"></div>
                         </ul>
-                        <ul id="assets_content" v-show="is_user">
+                        <ul id="assets_content">
                             <li style="display: block">
                                 <table >
                                     <tr>
@@ -186,7 +187,14 @@
                                         <th>result</th>
                                         <th>nas</th>
                                     </tr>
-                                    <tr v-for="(h,index) in user_history">
+                                    <tr v-show="is_user" v-for="(h,index) in user_history">
+                                        <td>{{h.id}}</td>
+                                        <td>{{h.target}}</td>
+                                        <td>{{h.rolled}}</td>
+                                        <td>{{h.result}}</td>
+                                        <td>{{h.nas}}</td>
+                                    </tr>
+                                    <tr v-show="!is_user" v-for="(h,index) in all_history">
                                         <td>{{h.id}}</td>
                                         <td>{{h.target}}</td>
                                         <td>{{h.rolled}}</td>
@@ -197,26 +205,23 @@
                             </li>
                         </ul>
 
-                        <ul id="active_content" v-show="!is_user">
-                            <li style="display: block">
-                                <table v-for="(h,index) in all_history">
-                                    <tr>
-                                        <th>id</th>
-                                        <th>target</th>
-                                        <th>rolled</th>
-                                        <th>result</th>
-                                        <th>nas</th>
-                                    </tr>
-                                    <tr>
-                                        <td>{{h.id}}</td>
-                                        <td>{{h.target}}</td>
-                                        <td>{{h.rolled}}</td>
-                                        <td>{{h.result}}</td>
-                                        <td>{{h.nas}}</td>
-                                    </tr>
-                                </table>
-                            </li>
-                        </ul>
+                        <div class="page-bar">
+                            <ul>
+                                <li v-if="cur>1"><a @click="pageClick">上一页</a></li>
+                                <li >
+                                    <a v-if="cur>1" @click="btnClick(1)">...</a>
+                                </li>
+                                <li>
+                                    <a @click="btnClick(index)">{{cur}}</a>
+                                </li>
+                                <li >
+                                    <a v-if="cur<page_size" @click="btnClick(page_size)">...</a>
+                                </li>
+                                <li v-if="cur!=page_size"><a @click="cur++,pageClick()">下一页</a></li>
+                                <li><a>共<i>{{page_size}}</i>页</a></li>
+                            </ul>
+                        </div>
+
                     </div>
 
                 </div>

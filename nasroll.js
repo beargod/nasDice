@@ -37,10 +37,12 @@ var User = function (text) {
     if (text) {
         var obj = JSON.parse(text);
         this.history = obj.history;
+        this.hSize = obj.hSize;
         this.balance = obj.balance;
         this.use = obj.use;
         this.award = obj.award;
     } else {
+        this.hSize = 0;
         this.history = [];
         this.balance =  new BigNumber(0);
         this.use =  new BigNumber(0);
@@ -148,19 +150,22 @@ NasRoll.prototype = {
         if(!user){
             user = new User();
         }
-        user.history.push(roll.id);
+        user.history.unshift(roll.id);
+        user.hSize++;
+
+        var awardHistory = LocalContractStorage.get("awardHistory");
+        if(!awardHistory){
+            awardHistory = new Array();
+        }
+        awardHistory.unshift(roll.id);
+        LocalContractStorage.set("awardHistory",awardHistory);
+
         user.use = new BigNumber(user.use).plus(value);
         if(win){
             this.myCommission = commissionAward.add(this.myCommission);
-            var awardHistory = LocalContractStorage.get("awardHistory");
-            if(!awardHistory){
-                awardHistory = new Array();
-            }
-            awardHistory.push(roll.id);
-            LocalContractStorage.set("awardHistory",awardHistory);
             roll.award = award;
             user.award = new BigNumber(user.award).plus(award);
-            if(award>this.jackpot){
+            if(award.gt(this.jackpot)){
                 user.balance = new BigNumber(user.balance).plus(award);
             }else {
                 this._transfer(from,award);
@@ -220,14 +225,18 @@ NasRoll.prototype = {
     },
 
     // 用户roll历史
-    userHistory: function () {
+    userHistory: function (begin,end) {
         var from = Blockchain.transaction.from;
         var user = this.user.get(from);
         if(!user){
             throw new Error("该用户没有roll历史");
         }
+        if(begin>end||begin<0||begin>user.hSize){
+            throw new Error("size error");
+        }
+        end = end>user.hSize?user.hSize:end;
         var history = [];
-        for (var i = 0; i < user.history.length; i++) {
+        for (var i = begin; i < end; i++) {
             history.push(this.roll.get(user.history[i]));
         }
         return history;
