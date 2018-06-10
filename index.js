@@ -74,14 +74,14 @@ var vm = new Vue({
         all: function () {
             vm.$data.is_user = 0;
             this.cur = 1;
-            this.page_size = Math.round(this.all_size / 10) + 1;
+            this.page_size = Math.round(this.all_size / 9) + 1;
             getAllSize();
             getAllHistory();
         },
         my: function () {
             vm.$data.is_user = 1;
             this.cur = 1;
-            this.page_size = Math.round(this.user_size / 10) + 1;
+            this.page_size = Math.round(this.user_size / 9) + 1;
             getUserHistory();
         },
         btnClick: function (data) {//页码点击事件
@@ -265,8 +265,8 @@ function cbSize(rs) {
 }
 
 function getAllHistory() {
-    var begin = 10 * (vm.cur - 1);
-    var end = begin + 10;
+    var begin = 9 * (vm.cur - 1);
+    var end = begin + 9;
     var callArgs = "[" + begin + "," + end + "]";
     nebGet("getHistory", callArgs, cbAllHistory);
 }
@@ -295,8 +295,8 @@ function cbAllHistory(rs) {
 }
 
 function getUserHistory() {
-    var begin = 10 * (vm.cur - 1);
-    var end = begin + 10;
+    var begin = 9 * (vm.cur - 1);
+    var end = begin + 9;
     var callArgs = "[" + begin + "," + end + "]";
     nebGet("userHistory", callArgs, cbUserHistory);
 }
@@ -343,11 +343,16 @@ function cbTakeout(rs) {
             neb.api.getTransactionReceipt({hash: vm.tx_hash}).then(function (resp) {
                 console.log("tx result: " + JSON.stringify(resp))
                 if (resp.status == 1) {
+
                     clearInterval(intervalQuery);
                     intervalQuery = null;
                     alert("取出余额成功");
-                    getJackpot();
-                    getUser();
+                    if(resp.from!=vm.address){
+                        vm.address=resp.from;
+                    }else {
+                        getJackpot();
+                        getUser();
+                    }
                 }
             }).catch(function (err) {
                 console.log(err);
@@ -383,6 +388,9 @@ function cbRoll(rs) {
                     clearInterval(intervalQuery);
                     intervalQuery = null;
                     successCb(resp);
+                    if(resp.from!=vm.address){
+                        vm.address=resp.from;
+                    }
                 }
             }).catch(function (err) {
                 console.log(err);
