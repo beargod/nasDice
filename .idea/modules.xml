@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/risk.iml" filepath="$PROJECT_DIR$/.idea/risk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/nasdice.iml" filepath="$PROJECT_DIR$/.idea/nasdice.iml" />
     </modules>
   </component>
 </project>

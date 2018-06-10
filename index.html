@@ -159,8 +159,10 @@
                     <div class="my_balance">
                         <label class="label1">我的余额</label>
                         <span class="chance">{{my_balance}}NAS</span>
-                        <input class="chance" type="number" v-model="take_balance">
-                        <button @click="take_out">取出</button>
+                        <input class="takeout" type="number" v-model="take_balance">
+                        <div class="num">
+                            <button class="takeout_button" @click="take_out">取出</button>
+                        </div>
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -176,7 +178,7 @@
                         </ul>
                         <ul id="assets_content" v-show="is_user">
                             <li style="display: block">
-                                <table v-for="(h,index) in user_history">
+                                <table >
                                     <tr>
                                         <th>id</th>
                                         <th>target</th>
@@ -184,7 +186,7 @@
                                         <th>result</th>
                                         <th>nas</th>
                                     </tr>
-                                    <tr>
+                                    <tr v-for="(h,index) in user_history">
                                         <td>{{h.id}}</td>
                                         <td>{{h.target}}</td>
                                         <td>{{h.rolled}}</td>

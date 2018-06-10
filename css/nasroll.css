@@ -26,16 +26,16 @@ img{border:0;}
 .nav .fr li{display: initial}
 
 /*rule*/
-.rule_total{width: 1170px}
-.rule{border: solid 1px #06afff;margin-top: 30px;padding:15px 0;}
+.rule_total{width: 1143px}
+.rule{border: solid 1px #06afff;margin-top: 25px;padding:15px 0;}
 .rule .fl{font-size: 18px;font-weight: 700;padding-left: 5%}
-.rule .fl .first{margin-top: 20px}
+.rule .fl .first{margin-top: 10px}
 .rule .fl li,.rule .fr li{font-size: 14px;font-weight: 600;line-height: 30px;}
-.rule .fr{margin-top:25px;padding-left: 50px}
+.rule .fr{margin-top:10px;padding-left: 50px}
 .rule .care{padding-left: 5%}
 .rule .wallet{padding-left: 120px;}
 .rule span{font-size: 12px}
-.rule .title{font-size: 24px;font-weight: 700;}
+.rule .title{font-size: 24px;font-weight: 700;margin-bottom: 0px}
 @media (max-width: 1024px) {
     .rule_total{width: 970px}   .nav .fl{margin-left: 5%}  .nav .fr{margin-right: 5%}
 }
@@ -53,7 +53,7 @@ img{border:0;}
 
 /*bets*/
 .bet_total{padding-right: 20px;line-height: 35px}
-.col-sm-4{margin-top: 30px;}
+.col-sm-4{margin-top: 20px;}
 .bet,.roll,.record{border: solid 1px #06afff;width: 375px;}
 .bet{padding-left: 30px;height: 447px}
 .bet_size,.win_chance,.section,.principal,.profit{margin-top: 10px}
@@ -93,6 +93,9 @@ img{border:0;}
 .result_con .title{font-size: 18px;margin-right: 40px}     .result_con .con{font-size: 16px}
 .pool .num,.my_income .num,.my_balance .num{float: right;margin-right: 30px;margin-top: 15px;}
 .pool .label1,.my_income .label1,.my_balance .label1,.my_Wallet .label1{line-height: 30px}
+.takeout {width: 100px;}
+.takeout_button{width: 40px;height: 25px;border: solid 1px #999999;text-align: center;line-height: 25px;
+    border-radius: 4px;}
 @media (max-width: 1024px) {
     .roll_but,.result_nub{width: 88px}  .txhash{margin-right: 10px}
 }

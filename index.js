@@ -76,7 +76,8 @@ var vm = new Vue({
     watch: {
         bet_size: function (newVal, oldVal) {
 
-            if(newVal===0){
+            if(newVal==0.000||newVal==0.00||newVal==0.0){
+                this.bet_size = newVal;
                 return;
             }
             var newVal = Math.round(newVal * 10000) / 10000;
@@ -106,7 +107,10 @@ var vm = new Vue({
         },
 
         take_balance: function (newVal, oldVal) {
-
+            if(newVal==0.000||newVal==0.00||newVal==0.0){
+                this.take_balance = newVal;
+                return;
+            }
             var newVal = Math.round(newVal * 10000) / 10000;
             if (newVal < 0) {
                 newVal = 0;
@@ -320,6 +324,9 @@ function getJackpot() {
 
 function cbJackpot(rs) {
     cbnetwork(rs);
+    if (!rs.result) {
+        return;
+    }
     vm.jackpot = bigNumberToNumber(toInt(rs.result));
 }
 
@@ -360,6 +367,9 @@ function getLowest() {
 function cbLowest(rs) {
     cbnetwork(rs);
     var result = rs.result;
+    if (!result) {
+        return;
+    }
     vm.$data.lowest = bigNumberToNumber(toInt(result));
 }
 
