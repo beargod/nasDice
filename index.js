@@ -75,14 +75,14 @@ var vm = new Vue({
         all: function () {
             vm.$data.is_user = 0;
             this.cur = 1;
-            this.page_size = Math.round(this.all_size / 9) + 1;
+            this.page_size = Math.floor(this.all_size / 9) + 1;
             getAllSize();
             getAllHistory();
         },
         my: function () {
             vm.$data.is_user = 1;
             this.cur = 1;
-            this.page_size = Math.round(this.user_size / 9) + 1;
+            this.page_size = Math.floor(this.user_size / 9) + 1;
             getUserHistory();
         },
         btnClick: function (data) {//页码点击事件
@@ -129,7 +129,7 @@ var vm = new Vue({
                 this.bet_size = newVal;
                 return;
             }
-            var newVal = Math.round(newVal * 10000) / 10000;
+            var newVal = Math.floor(newVal * 10000) / 10000;
             this.bet_size = newVal;
 
             if (newVal < vm.$data.wallet_balance && newVal > vm.$data.lowest) {
@@ -160,7 +160,7 @@ var vm = new Vue({
                 this.take_balance = newVal;
                 return;
             }
-            var newVal = Math.round(newVal * 10000) / 10000;
+            var newVal = Math.floor(newVal * 10000) / 10000;
             if (newVal < 0) {
                 newVal = 0;
             }
@@ -170,7 +170,7 @@ var vm = new Vue({
             this.take_balance = newVal;
         },
         bet_down: function (newVal, oldVal) {
-            var newVal = Math.round(newVal);
+            var newVal = Math.floor(newVal);
             if (newVal > 100) {
                 newVal = 100;
             }
@@ -187,7 +187,7 @@ var vm = new Vue({
             resizeProfit();
         },
         bet_up: function (newVal, oldVal) {
-            var newVal = Math.round(newVal);
+            var newVal = Math.floor(newVal);
             if (newVal < 1) {
                 newVal = 1;
             }
@@ -457,7 +457,7 @@ function getCommission() {
 
 function resizeProfit() {
     vm.$data.bet_profit = (vm.$data.bet_size) * (1 / vm.$data.chance * 100 - 1 - vm.$data.commission);
-    vm.$data.bet_profit = Math.round(vm.$data.bet_profit * 10000) / 10000;
+    vm.$data.bet_profit = Math.floor(vm.$data.bet_profit * 10000) / 10000;
 }
 
 function jrVal() {
@@ -466,7 +466,7 @@ function jrVal() {
 
 function cbCommission(rs) {
     cbnetwork(rs);
-    vm.$data.commission = Math.round(rs.result * 100);
+    vm.$data.commission = Math.floor(rs.result * 100);
     if (vm.$data.bet_down - vm.$data.bet_up > 100 - vm.$data.commission) {
         vm.$data.bet_down = 100 - vm.$data.commission + vm.$data.bet_up;
     }
@@ -503,7 +503,7 @@ function cbnetwork(rs) {
 
 function bigNumberToNumber(num) {
     var number = new BigNumber(num).toNumber();
-    number = Math.round(number / Math.pow(10, 14)) / 10000;
+    number = Math.floor(number / Math.pow(10, 14)) / 10000;
     ;
     return number;
 }
@@ -552,7 +552,7 @@ function RandomNumBoth(Min, Max) {
     var Range = Max - Min;
     var Rand = Math.random();
     var num = Min + Rand * Range; //四舍五入
-    return Math.round(num * 10000) / 10000;
+    return Math.floor(num * 10000) / 10000;
 };
 
 $(document).ready(function () {
