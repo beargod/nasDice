@@ -37,12 +37,13 @@ var vm = new Vue({
         last_roll: 0,
         last_award: 0,
         take_balance: 0,
-        is_user:1,
+        is_user: 1,
         page_size: 1, //总页数
         cur: 1,
-        user_size:0,
-        all_size:0,
-        network_error:0//当前页码
+        user_size: 0,
+        all_size: 0,
+        network_error: 0,//当前页码
+        error_address: 0
     },
     methods: {
         min: function () {
@@ -70,51 +71,51 @@ var vm = new Vue({
         take_out: function () {
             takeOut();
         },
-        all: function(){
-            vm.$data.is_user=0;
-            this.cur=1;
-            this.page_size=Math.round(this.all_size/10)+1;
+        all: function () {
+            vm.$data.is_user = 0;
+            this.cur = 1;
+            this.page_size = Math.round(this.all_size / 9) + 1;
             getAllSize();
             getAllHistory();
         },
         my: function () {
-            vm.$data.is_user=1;
-            this.cur=1;
-            this.page_size=Math.round(this.user_size/10)+1;
+            vm.$data.is_user = 1;
+            this.cur = 1;
+            this.page_size = Math.round(this.user_size / 9) + 1;
             getUserHistory();
         },
-        btnClick: function(data){//页码点击事件
-            if(data != this.cur){
+        btnClick: function (data) {//页码点击事件
+            if (data != this.cur) {
                 this.cur = data
             }
-            if(this.is_user) {
+            if (this.is_user) {
                 getUserHistory();
-            }else{
+            } else {
                 getAllHistory();
             }
         }
-    },computed: {
-        indexs: function(){
+    }, computed: {
+        indexs: function () {
             var left = 1;
             var right = this.page_size;
             var ar = [];
-            if(this.page_size>= 5){
-                if(this.cur > 3 && this.cur < this.page_size-2){
+            if (this.page_size >= 5) {
+                if (this.cur > 3 && this.cur < this.page_size - 2) {
                     left = this.cur - 2
                     right = this.cur + 2
-                }else{
-                    if(this.cur<=3){
+                } else {
+                    if (this.cur <= 3) {
                         left = 1
                         right = 5
-                    }else{
+                    } else {
                         right = this.page_size
-                        left = this.page_size -4
+                        left = this.page_size - 4
                     }
                 }
             }
-            while (left <= right){
+            while (left <= right) {
                 ar.push(left)
-                left ++
+                left++
             }
             return ar
         }
@@ -123,7 +124,7 @@ var vm = new Vue({
     watch: {
         bet_size: function (newVal, oldVal) {
 
-            if(newVal==0.000||newVal==0.00||newVal==0.0){
+            if (newVal == 0.000 || newVal == 0.00 || newVal == 0.0) {
                 this.bet_size = newVal;
                 return;
             }
@@ -154,7 +155,7 @@ var vm = new Vue({
         },
 
         take_balance: function (newVal, oldVal) {
-            if(newVal==0.000||newVal==0.00||newVal==0.0){
+            if (newVal == 0.000 || newVal == 0.00 || newVal == 0.0) {
                 this.take_balance = newVal;
                 return;
             }
@@ -180,7 +181,7 @@ var vm = new Vue({
             }
 
             this.bet_down = newVal;
-            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up+1;
+            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up + 1;
             $('.slider-input').jRange('setValue', jrVal());
             resizeProfit();
         },
@@ -193,21 +194,24 @@ var vm = new Vue({
                 newVal = vm.$data.bet_down;
             }
             if (vm.$data.bet_down - newVal > 98 - vm.$data.commission) {
-                newVal = vm.$data.bet_down+vm.$data.commission-98;
+                newVal = vm.$data.bet_down + vm.$data.commission - 98;
             }
 
             this.bet_up = newVal;
-            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up+1;
+            vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up + 1;
             $('.slider-input').jRange('setValue', jrVal());
             resizeProfit();
         },
-        cur: function(oldValue , newValue){
-            console.log(arguments);
+        address: function (newVal, oldVal) {
+            if(Account.isValidAddress(newVal)){
+                init();
+                this.error_address=0;
+            }else{
+                this.error_address=1;
+            }
         }
     }
 });
-
-
 
 
 $("#hide_txhash").hide();
@@ -226,48 +230,50 @@ var nebulas = require("nebulas"), Account = nebulas.Account, neb = new nebulas.N
 neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
 getWalletInfo((address) => {
     vm.$data.address = address;
+    if(address) {
+        init();
+    }
+});
+
+function init() {
+
     //获取钱包余额
     getBalance();
-});
-//获取最小值
-getLowest();
-//获取奖池
-getJackpot();
+    //获取最小值
+    getLowest();
+    //获取奖池
+    getJackpot();
 
-getUser();
+    getUser();
 
-getUserHistory();
+    getUserHistory();
 
-getAllSize();
+    getAllSize();
+}
 
 var intervalQuery;
 
 function getAllSize() {
     var value = 0;
     var callArgs = ""
-    nebPay.simulateCall(dappAddress, value, "getSize", callArgs, {
-        listener: cbSize
-    });
+    nebGet("getSize", callArgs, cbSize);
 }
 
 function cbSize(rs) {
     cbnetwork(rs);
-    vm.all_size = !rs.result?0:rs.result;
+    vm.all_size = !rs.result ? 0 : rs.result;
 }
 
 function getAllHistory() {
-    var begin = 10*(vm.cur-1);
-    var end = begin+10;
-    var value = 0;
-    var callArgs = "["+begin+","+end+"]";
-    nebPay.simulateCall(dappAddress, value, "getHistory", callArgs, {
-        listener: cbAllHistory
-    });
+    var begin = 9 * (vm.cur - 1);
+    var end = begin + 9;
+    var callArgs = "[" + begin + "," + end + "]";
+    nebGet("getHistory", callArgs, cbAllHistory);
 }
 
 function cbAllHistory(rs) {
     cbnetwork(rs);
-    if(!rs.result){
+    if (!rs.result) {
         return;
     }
     var hArray = JSON.parse(rs.result);
@@ -275,32 +281,29 @@ function cbAllHistory(rs) {
         return;
     }
     var uhArray = [];
-    for (var i = 0; i<hArray.length; i++) {
+    for (var i = 0; i < hArray.length; i++) {
         var uh = new Object();
-        uh.id=hArray[i].id;
-        uh.target=hArray[i].begin+"-"+hArray[i].under;
-        uh.rolled=hArray[i].result;
+        uh.id = hArray[i].id;
+        uh.target = hArray[i].begin + "-" + hArray[i].under;
+        uh.rolled = hArray[i].result;
         var award = bigNumberToNumber(hArray[i].award);
-        uh.result=award>0?"win":"lose";
-        uh.nas = award>0?"+"+award:"-"+bigNumberToNumber(hArray[i].nas);
+        uh.result = award > 0 ? "win" : "lose";
+        uh.nas = award > 0 ? "+" + award : "-" + bigNumberToNumber(hArray[i].nas);
         uhArray.push(uh);
     }
-    vm.all_history=uhArray;
+    vm.all_history = uhArray;
 }
 
 function getUserHistory() {
-    var begin = 10*(vm.cur-1);
-    var end = begin+10;
-    var value = 0;
-    var callArgs = "["+begin+","+end+"]";
-    nebPay.simulateCall(dappAddress, value, "userHistory", callArgs, {
-        listener: cbUserHistory
-    });
+    var begin = 9 * (vm.cur - 1);
+    var end = begin + 9;
+    var callArgs = "[" + begin + "," + end + "]";
+    nebGet("userHistory", callArgs, cbUserHistory);
 }
 
 function cbUserHistory(rs) {
     cbnetwork(rs);
-    if(!rs.result){
+    if (!rs.result) {
         return;
     }
     var hArray = JSON.parse(rs.result);
@@ -308,17 +311,17 @@ function cbUserHistory(rs) {
         return;
     }
     var uhArray = [];
-    for (var i = 0; i<hArray.length; i++) {
+    for (var i = 0; i < hArray.length; i++) {
         var uh = new Object();
-        uh.id=hArray[i].id;
-        uh.target=hArray[i].begin+"-"+hArray[i].under;
-        uh.rolled=hArray[i].result;
+        uh.id = hArray[i].id;
+        uh.target = hArray[i].begin + "-" + hArray[i].under;
+        uh.rolled = hArray[i].result;
         var award = bigNumberToNumber(hArray[i].award);
-        uh.result=award>0?"win":"lose";
-        uh.nas = award>0?"+"+award:"-"+bigNumberToNumber(hArray[i].nas);
+        uh.result = award > 0 ? "win" : "lose";
+        uh.nas = award > 0 ? "+" + award : "-" + bigNumberToNumber(hArray[i].nas);
         uhArray.push(uh);
     }
-    vm.user_history=uhArray;
+    vm.user_history = uhArray;
 }
 
 function takeOut() {
@@ -340,11 +343,16 @@ function cbTakeout(rs) {
             neb.api.getTransactionReceipt({hash: vm.tx_hash}).then(function (resp) {
                 console.log("tx result: " + JSON.stringify(resp))
                 if (resp.status == 1) {
+
                     clearInterval(intervalQuery);
-                    intervalQuery=null;
+                    intervalQuery = null;
                     alert("取出余额成功");
-                    getJackpot();
-                    getUser();
+                    if(resp.from!=vm.address){
+                        vm.address=resp.from;
+                    }else {
+                        getJackpot();
+                        getUser();
+                    }
                 }
             }).catch(function (err) {
                 console.log(err);
@@ -378,8 +386,11 @@ function cbRoll(rs) {
                 console.log("tx result: " + JSON.stringify(resp))
                 if (resp.status == 1) {
                     clearInterval(intervalQuery);
-                    intervalQuery=null;
+                    intervalQuery = null;
                     successCb(resp);
+                    if(resp.from!=vm.address){
+                        vm.address=resp.from;
+                    }
                 }
             }).catch(function (err) {
                 console.log(err);
@@ -406,11 +417,8 @@ function successCb(rs) {
 }
 
 function getUser() {
-    var value = 0;
     var callArgs = ""
-    nebPay.simulateCall(dappAddress, value, "getUser", callArgs, {
-        listener: cbUser
-    });
+    nebGet("getUser", callArgs, cbUser);
 }
 
 function cbUser(rs) {
@@ -426,11 +434,8 @@ function cbUser(rs) {
 }
 
 function getJackpot() {
-    var value = 0;
     var callArgs = ""
-    nebPay.simulateCall(dappAddress, value, "getJackpot", callArgs, {
-        listener: cbJackpot
-    });
+    nebGet("getJackpot", callArgs, cbJackpot);
 }
 
 function cbJackpot(rs) {
@@ -442,11 +447,8 @@ function cbJackpot(rs) {
 }
 
 function getCommission() {
-    var value = 0;
-    var callArgs = ""
-    nebPay.simulateCall(dappAddress, value, "getCommission", callArgs, {
-        listener: cbCommission
-    });
+    var callArgs = "";
+    nebGet("getCommission", callArgs, cbCommission);
 }
 
 function resizeProfit() {
@@ -466,15 +468,9 @@ function cbCommission(rs) {
     }
 }
 
-function showHistory(){
-}
-
 function getLowest() {
-    var value = 0;
     var callArgs = ""
-    nebPay.simulateCall(dappAddress, value, "getLowest", callArgs, {
-        listener: cbLowest
-    });
+    nebGet("getLowest", callArgs, cbLowest);
 }
 
 function cbLowest(rs) {
@@ -488,7 +484,7 @@ function cbLowest(rs) {
 
 function cbnetwork(rs) {
     if (rs == "Network Error") {
-        vm.network_error=1;
+        vm.network_error = 1;
         return
     }
     if (rs == "Error: Transaction rejected by user") {
@@ -498,7 +494,7 @@ function cbnetwork(rs) {
     if (!rs.execute_err && rs.execute_err != "") {
         alert(rs.execute_err);
     }
-    vm.network_error=0;
+    vm.network_error = 0;
 }
 
 function bigNumberToNumber(num) {
@@ -552,7 +548,7 @@ function RandomNumBoth(Min, Max) {
     var Range = Max - Min;
     var Rand = Math.random();
     var num = Min + Rand * Range; //四舍五入
-    return Math.round(num*10000)/10000;
+    return Math.round(num * 10000) / 10000;
 };
 
 $(document).ready(function () {
@@ -563,7 +559,15 @@ $(document).ready(function () {
         var nn = change.split(',');
         vm.$data.bet_up = parseFloat(nn[0]);
         vm.$data.bet_down = parseFloat(nn[1]);
-        vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up+1;
+        vm.$data.chance = vm.$data.bet_down - vm.$data.bet_up + 1;
     });
 });
 
+function nebGet(f, a, t) {
+    var s = vm.$data.address ? vm.$data.address : "n1aQUiCuDRxUe3Zj2qCuHjawmrLxm4hfbSu";
+
+    var r = {function: f, args: a};
+    neb.api.call(s, dappAddress, "0", "1", "1", "1", r).then(function (a) {
+        t(a)
+    })
+}
