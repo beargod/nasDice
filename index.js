@@ -24,14 +24,14 @@ var vm = new Vue({
         show_history: [],
         history_size: 0,
         bet_up: 1,
-        bet_down: 51,
+        bet_down: 50,
         bet_size: 0.0001,
         bet_profit: 0.0,
         web_wallet: 1,
         wallet_balance: 0,
         chance: 50,
         short_hash: "",
-        tx_hash: "aaaaaa",
+        tx_hash: "",
         my_profit: 0,
         my_balance: 0,
         last_roll: 0,
@@ -43,7 +43,8 @@ var vm = new Vue({
         user_size: 0,
         all_size: 0,
         network_error: 0,//当前页码
-        error_address: 0
+        error_address: 0,
+        win: 0
     },
     methods: {
         min: function () {
@@ -408,7 +409,10 @@ function successCb(rs) {
     }
     vm.last_roll = newRoll.result;
     if (new BigNumber(newRoll.award).gt(0)) {
+        vm.win=1;
         alert("恭喜你，赢得了" + bigNumberToNumber(newRoll.award) + "nas");
+    }else {
+        vm.win=0;
     }
     vm.last_award = bigNumberToNumber(newRoll.award);
     getJackpot();
