@@ -24,7 +24,7 @@ var vm = new Vue({
         show_history: [],
         history_size: 0,
         bet_up: 1,
-        bet_down: 51,
+        bet_down: 50,
         bet_size: 0.0001,
         bet_profit: 0.0,
         web_wallet: 1,
