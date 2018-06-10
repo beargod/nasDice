@@ -122,7 +122,7 @@
                     </div>
                     <button class="roll_but" @click="roll">ROLL</button>
                     <div class="txhash">
-                        <span v-show="!tx_hash" @click="copy_hash">txhash:{{short_hash}}</span>
+                        <span v-show="tx_hash" @click="copy_hash">txhash:{{short_hash}}</span>
                     </div>
                     <div class="clearfix"></div>
                     <div class="result">
