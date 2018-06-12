@@ -40,7 +40,7 @@
                         <p class="title">How To Play</p>
                     </div>
                     <div class="col-sm-12 col-md-5">
-                        <span class="wallet" v-show="web_wallet">Not connected to Nebulas node. Install &nbsp<a
+                        <span class="wallet" v-show="!web_wallet">Not connected to Nebulas node. Install &nbsp<a
                                 href="">NasWallet</a>&nbsp to connect.</span>
                         <span class="wallet" v-show="network_error">Nebulas network error,please try again</span>
                     </div>
