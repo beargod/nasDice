@@ -22,7 +22,7 @@
         <ul class="fr">
             <li><a href="http://nebulas.io">星云链</a>&nbsp&nbsp|</li>
             <li><a href="https://github.com/beargod/nasdice">Github</a>&nbsp&nbsp|</li>
-            <li><a href="index_en.html">en</a></li>
+            <li><a href="index_en.html">English</a></li>
         </ul>
         <div class="clearfix"></div>
     </div>
@@ -213,12 +213,12 @@
 
                         <div class="page-bar">
                             <ul>
-                                <li v-if="cur>1"><a @click="pageClick">上一页</a></li>
+                                <li v-if="cur>1"><a @click="btnClick(cur-1)">上一页</a></li>
                                 <li >
                                     <a v-if="cur>1" @click="btnClick(1)">...</a>
                                 </li>
                                 <li>
-                                    <a @click="btnClick(index)">{{cur}}</a>
+                                    <a @click="btnClick(cur)">{{cur}}</a>
                                 </li>
                                 <li >
                                     <a v-if="cur<page_size" @click="btnClick(page_size)">...</a>
